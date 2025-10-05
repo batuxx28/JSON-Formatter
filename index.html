@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON/XML Formatter & Exporter</title>
+
+    <meta name="description" id="metaDescription" content="Formatea, valida y exporta datos JSON y XML en segundos con resultados limpios y opciones de exportacion.">
+
+    <meta name="keywords" id="metaKeywords" content="JSON formatter, XML formatter, JSON validator, XML validator, export JSON, export XML">
+
+    <meta name="author" content="FormatterApp">
+
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" id="ogTitle" content="JSON/XML Formatter & Exporter">
+
+    <meta property="og:description" id="ogDescription" content="Formatea, valida y exporta datos JSON y XML desde tu navegador sin enviar nada a servidores.">
+
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary">
+
+    <meta name="twitter:title" id="twitterTitle" content="JSON/XML Formatter & Exporter">
+
+    <meta name="twitter:description" id="twitterDescription" content="Formatea, valida y exporta datos JSON y XML directamente en el navegador.">
+    <link rel="stylesheet" href="style.css">
+
+    <script type="application/ld+json" id="structuredData">
+
+    {"@context":"https://schema.org","@type":"WebApplication","name":"JSON/XML Formatter & Exporter","applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"Formatea, valida y exporta datos JSON y XML en segundos con resultados limpios y opciones de exportacion.","inLanguage":"es"}
+
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="headerTitle">Formateador JSON/XML</h1>
+            <p id="headerSubtitle">Formatea, valida y exporta tus datos estructurados con estilo</p>
+        </div>
+
+        <div class="controls">
+            <div class="format-tabs">
+                <button type="button" class="format-tab active" data-format="json">JSON</button>
+                <button type="button" class="format-tab" data-format="xml">XML</button>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="formatBtn">
+                <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 5h14v2H5zm0 6h14v2H5zm0 6h10v2H5z"/></svg>
+                </span>
+                <span id="formatText">Formatear</span>
+            </button>
+
+            <button type="button" class="btn btn-secondary" id="validateBtn">
+                <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.2l-3.2-3.2L4 14l5 5L20 8.1l-1.4-1.4z"/></svg>
+                </span>
+                <span id="validateText">Validar</span>
+            </button>
+
+            <button type="button" class="btn btn-secondary" id="minifyBtn">
+                <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 7h10v2H7zm0 4h6v2H7zm0 4h10v2H7z"/></svg>
+                </span>
+                <span id="minifyText">Minificar</span>
+            </button>
+
+            <button type="button" class="btn btn-secondary" id="clearBtn">
+                <span class="btn-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path fill="currentColor" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zm12-14h-3.5l-1-1h-3l-1 1H6v2h12z"/></svg>
+                </span>
+                <span id="clearText">Limpiar</span>
+            </button>
+
+            <div class="export-dropdown">
+                <button type="button" class="btn btn-export" id="exportBtn">
+                    <span class="btn-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3v12.17l3.59-3.58L17 13l-5 5-5-5 1.41-1.41L11 15.17V3zM5 19h14v2H5z"/></svg>
+                    </span>
+                    <span id="exportText">Exportar</span>
+                </button>
+                <div class="export-menu" id="exportMenu">
+                    <button type="button" class="export-option" data-format="json" id="exportJsonText">Exportar como JSON</button>
+                    <button type="button" class="export-option" data-format="xml" id="exportXmlText">Exportar como XML</button>
+                    <button type="button" class="export-option" data-format="excel" id="exportExcelText">Exportar como Excel</button>
+                    <button type="button" class="export-option" data-format="csv" id="exportCsvText">Exportar como CSV</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content resizable-main">
+            <div class="input-section resizable-panel">
+                <div class="section-header">
+                    <span id="inputHeader">Entrada - Pega tu c&oacute;digo aqu&iacute;</span>
+                </div>
+                <div class="editor-wrapper">
+                    <pre class="line-numbers" id="inputLineNumbers" aria-hidden="true"><span>1</span></pre>
+                    <textarea class="editor input-editor" id="inputEditor" placeholder="Pega tu JSON o XML aqu&iacute;..."></textarea>
+                </div>
+            </div>
+            <div class="resizer" id="horizontalResizer"></div>
+            <div class="output-section resizable-panel">
+                <div class="section-header">
+                    <span id="outputHeader">Salida - Resultado formateado</span>
+                    <button type="button" class="copy-btn" id="copyBtn" aria-label="Copiar resultado" title="Copiar resultado" data-label="Copiar">
+                        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12zm3 4H8a2 2 0 0 0-2 2v14h13a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm0 16H8V7h11z"/></svg>
+                    </button>
+                </div>
+                <div class="editor output-editor highlighted-code" id="outputEditor"></div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="stats">
+                <span id="charCount">Caracteres: 0</span>
+                <span id="lineCount">L&iacute;neas: 0</span>
+                <span id="sizeInfo">Tama&ntilde;o: 0 B</span>
+            </div>
+            <div id="statusMessage" class="status-valid">Listo para formatear</div>
+        </div>
+    </div>
+
+        <section class="faq">
+            <h2 id="faqTitle">Preguntas frecuentes</h2>
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span id="faqQuestion1" data-faq-question="1">&iquest;Esta web almacena datos?</span>
+                    <span aria-hidden="true" class="faq-icon">+</span>
+                </button>
+                <div class="faq-content">
+                    <p id="faqAnswer1" data-faq-answer="1">No, toda la l&oacute;gica corre en tu navegador; no tocamos servidores ni guardamos informaci&oacute;n.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span id="faqQuestion2" data-faq-question="2">&iquest;Puedo ver el c&oacute;digo fuente?</span>
+                    <span aria-hidden="true" class="faq-icon">+</span>
+                </button>
+                <div class="faq-content">
+                    <p id="faqAnswer2" data-faq-answer="2">Claro, la aplicaci&oacute;n es 100% est&aacute;tica. Puedes descargarla y revisarla sin restricciones.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span id="faqQuestion3" data-faq-question="3">&iquest;Espero cobrar algo por esto?</span>
+                    <span aria-hidden="true" class="faq-icon">+</span>
+                </button>
+                <div class="faq-content">
+                    <p id="faqAnswer3" data-faq-answer="3">Quiz&aacute; m&aacute;s adelante incorpore alg&uacute;n anuncio, pero hoy el uso es totalmente gratuito.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span id="faqQuestion4" data-faq-question="4">&iquest;Por qu&eacute; se realiz&oacute; esta web?</span>
+                    <span aria-hidden="true" class="faq-icon">+</span>
+                </button>
+                <div class="faq-content">
+                    <p id="faqAnswer4" data-faq-answer="4">Naci&oacute; de la urgencia por formatear JSON y XML de forma r&aacute;pida sin instalar nada.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <button class="faq-trigger">
+                    <span id="faqQuestion5" data-faq-question="5">&iquest;Se har&aacute;n nuevas mejoras?</span>
+                    <span aria-hidden="true" class="faq-icon">+</span>
+                </button>
+                <div class="faq-content">
+                    <p id="faqAnswer5" data-faq-answer="5">S&iacute;, el plan es seguir puliendo la herramienta y sumar funciones &uacute;tiles.</p>
+                </div>
+            </div>
+        </section>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
+
+
+
+
+
+
