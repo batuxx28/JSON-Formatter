@@ -209,6 +209,8 @@ body {
     resize: none;
     outline: none;
     background: #FAFAFA;
+    max-height: 60vh;
+    overflow: auto;
 }
 .input-editor {
     background: #FFFAFA;
@@ -218,6 +220,7 @@ body {
     display: flex;
     background: #FFFAFA;
     overflow: hidden;
+    max-height: 60vh;
 }
 .editor-wrapper .input-editor {
     flex: 1;
@@ -240,6 +243,7 @@ body {
     align-items: flex-end;
     gap: 0;
     overflow: hidden;
+    max-height: 60vh;
 }
 .line-numbers span {
     display: block;
