@@ -249,6 +249,22 @@ body {
     display: block;
     width: 100%;
 }
+.line-numbers.is-disabled {
+    justify-content: center;
+    align-items: center;
+    padding: 30px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: #64748B;
+}
+.line-numbers.is-disabled::after {
+    content: attr(data-message);
+    white-space: normal;
+    line-height: 1.4;
+}
+.line-numbers.is-disabled span {
+    display: none;
+}
 .output-editor {
     background: #F9FFF9;
    white-space: pre-wrap;   /* o "pre" si no quieres wraps */
@@ -297,6 +313,10 @@ body {
 }
 .status-valid {
     color: #38A169;
+    font-weight: 600;
+}
+.status-warning {
+    color: #B45309;
     font-weight: 600;
 }
 .status-error {

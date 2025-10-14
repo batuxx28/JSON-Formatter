@@ -5,6 +5,12 @@ class FormatterApp {
         this.lastOutputText = '';
         this.lastOutputFormat = null;
         this.lastInputLineCount = 0;
+        this.largeInputThreshold = 200000;
+        this.highlightCharacterLimit = 200000;
+        this.highlightLineLimit = 5000;
+        this.maxLineNumberDisplay = 5000;
+        this.autoFormatTimer = null;
+        this.largeInputNoticeActive = false;
         this.userLocale = this.detectUserLocale();
         this.translations = this.getTranslations();
         this.initializeElements();
@@ -68,6 +74,8 @@ class FormatterApp {
                 dataCleared: 'Datos limpiados',
                 exportSuccess: 'Exportado como',
                 errorPrefix: 'Error',
+                largeInputWarning: 'Entrada muy grande, usa el botón "Formatear" para procesarla',
+                lineNumbersDisabled: 'Numeración de líneas deshabilitada para entradas muy grandes',
                 noDataToValidate: 'No hay datos para validar',
                 noDataToMinify: 'No hay datos para minificar',
                 noDataToExport: 'No hay datos para exportar',
@@ -122,6 +130,8 @@ class FormatterApp {
                 dataCleared: 'Data cleared',
                 exportSuccess: 'Exported as',
                 errorPrefix: 'Error',
+                largeInputWarning: 'Large input detected, use the "Format" button to process it',
+                lineNumbersDisabled: 'Line numbers disabled for very large inputs',
                 noDataToValidate: 'No data to validate',
                 noDataToMinify: 'No data to minify',
                 noDataToExport: 'No data to export',
@@ -198,7 +208,7 @@ class FormatterApp {
     }
 
     setOutputContent(text, format, options = {}) {
-        const { highlight = false } = options;
+        const { highlight = false, parsedData = null } = options;
         const hasText = Boolean(text);
 
         this.lastOutputText = hasText ? text : '';
@@ -210,9 +220,13 @@ class FormatterApp {
             return;
         }
 
-        if (highlight) {
+        const shouldHighlight = highlight
+            && text.length <= this.highlightCharacterLimit
+            && this.countLines(text) <= this.highlightLineLimit;
+
+        if (shouldHighlight) {
             this.outputEditor.classList.add('is-highlighted');
-            this.outputEditor.innerHTML = this.highlightJSON(text);
+            this.outputEditor.innerHTML = this.highlightJSON(text, parsedData);
         } else {
             this.outputEditor.classList.remove('is-highlighted');
             this.outputEditor.textContent = text;
@@ -254,14 +268,12 @@ class FormatterApp {
         });
 
         this.inputEditor.addEventListener('input', () => {
-            this.updateStats();
-            this.autoFormat();
+            this.handleEditorInput();
         });
 
         this.inputEditor.addEventListener('paste', () => {
             setTimeout(() => {
-                this.updateStats();
-                this.autoFormat();
+                this.handleEditorInput();
             }, 100);
         });
 
@@ -293,6 +305,7 @@ class FormatterApp {
         this.updateSeoMetadata();
 
         this.switchFormat(this.currentFormat);
+        this.updateInputLineNumbers(this.lastInputLineCount);
         this.updateStatus(this.t('ready'), 'valid');
     }
 
@@ -396,7 +409,7 @@ class FormatterApp {
     updateStats() {
         const input = this.inputEditor.value;
         const characters = input.length;
-        const lines = input ? input.split('\n').length : 0;
+        const lines = this.countLines(input);
         const size = new Blob([input]).size;
 
         this.charCount.textContent = `${this.t('characters')}: ${characters.toLocaleString()}`;
@@ -412,8 +425,19 @@ class FormatterApp {
 
         const computedLines = typeof lineCount === 'number'
             ? lineCount
-            : (this.inputEditor.value ? this.inputEditor.value.split('\n').length : 0);
+            : this.countLines(this.inputEditor.value);
         const totalLines = Math.max(1, computedLines);
+
+        if (totalLines > this.maxLineNumberDisplay) {
+            this.inputLineNumbers.innerHTML = '';
+            this.inputLineNumbers.classList.add('is-disabled');
+            this.inputLineNumbers.setAttribute('data-message', this.t('lineNumbersDisabled'));
+            this.lastInputLineCount = totalLines;
+            return;
+        }
+
+        this.inputLineNumbers.classList.remove('is-disabled');
+        this.inputLineNumbers.removeAttribute('data-message');
 
         if (this.lastInputLineCount === totalLines) {
             this.syncInputLineScroll();
@@ -436,15 +460,51 @@ class FormatterApp {
         this.inputLineNumbers.scrollTop = this.inputEditor.scrollTop;
     }
 
-    autoFormat() {
-        const input = this.inputEditor.value.trim();
+    handleEditorInput() {
+        this.updateStats();
+        this.scheduleAutoFormat();
+    }
+
+    scheduleAutoFormat() {
+        if (this.autoFormatTimer) {
+            clearTimeout(this.autoFormatTimer);
+        }
+
+        const length = this.inputEditor.value.length;
+        const delay = length > 5000 ? 400 : 200;
+        this.autoFormatTimer = window.setTimeout(() => {
+            this.autoFormat();
+        }, delay);
+    }
+
+    autoFormat(options = {}) {
+        const { force = false } = options;
+        if (this.autoFormatTimer) {
+            clearTimeout(this.autoFormatTimer);
+            this.autoFormatTimer = null;
+        }
+        const rawInput = this.inputEditor.value;
+        const input = rawInput.trim();
 
         if (!input) {
             this.clearOutput();
             this.toggleCopyButton(false);
             this.updateStatus(this.t('ready'), 'valid');
+            this.largeInputNoticeActive = false;
             return;
         }
+
+        if (!force && rawInput.length > this.largeInputThreshold) {
+            if (!this.largeInputNoticeActive) {
+                this.updateStatus(this.t('largeInputWarning'), 'warning');
+                this.largeInputNoticeActive = true;
+            }
+            this.clearOutput();
+            this.toggleCopyButton(false);
+            return;
+        }
+
+        this.largeInputNoticeActive = false;
 
         if (this.currentFormat === 'json') {
             this.formatJson(input);
@@ -457,7 +517,13 @@ class FormatterApp {
         try {
             const parsed = JSON.parse(input);
             const formatted = JSON.stringify(parsed, null, 2);
-            this.setOutputContent(formatted, 'json', { highlight: true });
+            const lineCount = this.countLines(formatted);
+            const shouldHighlight = lineCount <= this.highlightLineLimit
+                && formatted.length <= this.highlightCharacterLimit;
+            this.setOutputContent(formatted, 'json', {
+                highlight: shouldHighlight,
+                parsedData: shouldHighlight ? parsed : null
+            });
             this.toggleCopyButton(true);
             this.updateStatus(this.t('formatSuccess'), 'valid');
         } catch (error) {
@@ -482,7 +548,7 @@ class FormatterApp {
         }
     }
     formatData() {
-        this.autoFormat();
+        this.autoFormat({ force: true });
     }
 
     validateData() {
@@ -544,6 +610,11 @@ class FormatterApp {
         this.inputEditor.value = '';
         this.clearOutput();
         this.toggleCopyButton(false);
+        this.largeInputNoticeActive = false;
+        if (this.autoFormatTimer) {
+            clearTimeout(this.autoFormatTimer);
+            this.autoFormatTimer = null;
+        }
         this.updateStatus(this.t('dataCleared'), 'valid');
         this.updateStats();
     }
@@ -608,9 +679,9 @@ class FormatterApp {
         return this.escapeHtml(text);
     }
 
-    highlightJSON(text) {
+    highlightJSON(text, parsedData = null) {
         try {
-            const data = JSON.parse(text);
+            const data = parsedData !== null ? parsedData : JSON.parse(text);
             const rows = [];
             let lineNum = 1;
             let idCounter = 0;
@@ -1193,6 +1264,20 @@ class FormatterApp {
             .join('');
 
         return childOutput.trim();
+    }
+
+    countLines(text) {
+        if (!text) {
+            return 0;
+        }
+
+        let count = 1;
+        for (let index = 0; index < text.length; index += 1) {
+            if (text.charCodeAt(index) === 10) {
+                count += 1;
+            }
+        }
+        return count;
     }
 
     formatBytes(bytes) {
