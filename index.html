@@ -28,14 +28,51 @@
 
     <script type="application/ld+json" id="structuredData">
 
-    {"@context":"https://schema.org","@type":"WebApplication","name":"JSON/XML Formatter & Exporter","applicationCategory":"DeveloperApplication","operatingSystem":"Any","description":"Formatea, valida y exporta datos JSON y XML en segundos con resultados limpios y opciones de exportacion.","inLanguage":"es"}
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://www.cleanify.dev/#organization",
+      "name": "Cleanify",
+      "url": "https://www.cleanify.dev/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.cleanify.dev/images/cleanify-logo.png"
+      }
+    },
+    {
+      "@type": "WebApplication",
+      "@id": "https://www.cleanify.dev/#app",
+      "name": "Cleanify",
+      "alternateName": "Cleanify JSON/XML Formatter",
+      "url": "https://www.cleanify.dev/",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Any",
+      "isAccessibleForFree": true,
+      "image": "https://www.cleanify.dev/images/cleanify-logo.png",
+      "description": "Herramienta online gratuita para formatear, validar, minificar y exportar datos JSON y XML directamente en el navegador.",
+      "inLanguage": "es"
+    }
+  ]
+}
 
     </script>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 id="headerTitle">Formateador JSON/XML</h1>
+        <a href="/" class="brand" aria-label="Cleanify - Inicio">
+        <img
+            src="images/cleanify-logo.svg"
+            alt="Cleanify"
+            class="brand-logo"
+            width="40"
+            height="40"
+        >
+        <span class="brand-name">Cleanify</span>
+    </a>
+            <h1 id="headerTitle">Formateador JSON y XML Online | Cleanify</h1>
             <p id="headerSubtitle">Formatea, valida y exporta tus datos estructurados con estilo</p>
         </div>
 
